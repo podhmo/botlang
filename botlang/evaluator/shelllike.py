@@ -1,10 +1,11 @@
 import shlex
+import string
 
 
 def parse_line(code):
     r = []
     buf = []
-    for tk in shlex.split(code, comments=True):
+    for tk in shlex.split(code, comments=True, posix=True):
         if tk == "|":
             r.append(buf)
             buf = []
@@ -31,8 +32,8 @@ class Evaluator:
                 self._eval(action, *[self._eval_value(v) for v in args])
 
     def _eval_value(self, val):
-        if val.startswith("${") and val.endswith("}"):
-            return self.store.get(val[2:-1])
+        if "${" in val and "}" in val:
+            return string.Template(val).safe_substitute(**self.store.as_dict())
         elif val.startswith("$"):
             return self.store.get(val[1:])
         elif "=" in val:
@@ -44,6 +45,8 @@ class Evaluator:
     def _eval(self, action, *args):
         if action == "echo":
             self.port.output(*args)
+        elif action == "set":
+            self.store.set(*args)
         else:
             raise NotImplementedError(action)
 
@@ -52,6 +55,7 @@ if __name__ == "__main__":
     from botlang.port.console import Port
     from botlang.store.inmemory import Store
     ev = Evaluator(parser=parse_line, port=Port(), store=Store())
-    ev.eval("echo hello")
-    ev.eval("name=10")
-    ev.eval("echo hello: ${name}")
+    ev.eval('echo hello')
+    ev.eval('name=foo')
+    ev.eval('set your_age 20')
+    ev.eval('echo hello: "${name}(${your_age})"')

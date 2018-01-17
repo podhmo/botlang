@@ -19,6 +19,9 @@ class Store:
     def newscope(self):
         return self.__class__(*self.env.maps)
 
+    def as_dict(self):
+        return self.env
+
 
 def _fullscan(store, name):
     for m in store.env.maps:
