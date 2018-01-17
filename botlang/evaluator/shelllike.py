@@ -24,12 +24,21 @@ class Evaluator:
         self.port = port
 
     def eval(self, code):
+        r = None
         for tokens in self.parser(code):
-            action, *args = tokens
+            action, *new_args = tokens
+            args = []
+            if r is not None:
+                args.append(r)
+                r = None
+            if new_args:
+                args.extend([self._eval_value(v) for v in new_args])
+
             if not args:
                 self._eval_value(action)
             else:
-                self._eval(action, *[self._eval_value(v) for v in args])
+                r = self._eval(action, *args)
+        return r
 
     def _eval_value(self, val):
         if "${" in val and "}" in val:
@@ -44,9 +53,11 @@ class Evaluator:
 
     def _eval(self, action, *args):
         if action == "echo":
-            self.port.output(*args)
+            return self.port.output(*args)
         elif action == "set":
-            self.store.set(*args)
+            return self.store.set(*args)
+        elif action == "get":
+            return self.store.get(*args)
         else:
             raise NotImplementedError(action)
 
@@ -59,3 +70,4 @@ if __name__ == "__main__":
     ev.eval('name=foo')
     ev.eval('set your_age 20')
     ev.eval('echo hello: "${name}(${your_age})"')
+    ev.eval('get name | echo 2')
