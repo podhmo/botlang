@@ -1,7 +1,7 @@
 from collections import ChainMap
 
 
-class Inmemory:
+class Store:
     make_env = dict
 
     def __init__(self, *maps):
@@ -28,7 +28,7 @@ def _fullscan(store, name):
 
 if __name__ == "__main__":
     d = {"name": "*root*"}
-    store = Inmemory(d)
+    store = Store(d)
     print("root", store.get("name"))
     store.set("name", "foo")
     print("root -> store", store.get("name"))
