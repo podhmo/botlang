@@ -17,10 +17,10 @@ def parse_line(code):
 
 # todo: debug
 class Evaluator:
-    def __init__(self, *, parser, store, communicator):
+    def __init__(self, *, parser, store, port):
         self.parser = parser
         self.store = store
-        self.communicator = communicator
+        self.port = port
 
     def eval(self, code):
         for tokens in self.parser(code):
@@ -42,16 +42,16 @@ class Evaluator:
             return val
 
     def _eval(self, action, *args):
-        if action == "say":
-            self.communicator.say(*args)
+        if action == "echo":
+            self.port.output(*args)
         else:
             raise NotImplementedError(action)
 
 
 if __name__ == "__main__":
-    from botlang.communication.console import Communication
+    from botlang.port.console import Port
     from botlang.store.inmemory import Store
-    ev = Evaluator(parser=parse_line, communicator=Communication(), store=Store())
-    ev.eval("say hello")
+    ev = Evaluator(parser=parse_line, port=Port(), store=Store())
+    ev.eval("echo hello")
     ev.eval("name=10")
-    ev.eval("say hello: ${name}")
+    ev.eval("echo hello: ${name}")

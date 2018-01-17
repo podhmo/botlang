@@ -1,15 +1,15 @@
 import sys
 
 
-class Communication:
+class Port:
     def __init__(self, inp=sys.stdin, outp=sys.stdout):
         self.inp = inp
         self.outp = outp
 
-    def say(self, *msg):
+    def output(self, *msg):
         print(*msg, file=self.outp)
 
-    def ask(self, prompt):
+    def input(self, prompt):
         if not prompt.endswith("\n"):
             prompt = prompt + ":\n"
 
@@ -24,5 +24,5 @@ class Communication:
 
 if __name__ == "__main__":
     from io import StringIO
-    client = Communication(StringIO("foo"))
-    client.say(client.ask("What your name?"))
+    client = Port(StringIO("foo"))
+    client.output(client.input("What your name?"))
